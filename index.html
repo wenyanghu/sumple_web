@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Web</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+
+    <main class="container">
+      <header class="hero">
+        <p class="badge">Simple Web Project</p>
+        <h1>簡單網頁專案</h1>
+        <p class="subtitle">HTML + CSS + JavaScript，待辦存到 data/todos.json。</p>
+      </header>
+
+      <section class="card">
+        <h2>待辦清單</h2>
+        <form id="todo-form" class="todo-form">
+          <input
+            id="todo-input"
+            type="text"
+            placeholder="輸入待辦事項..."
+            autocomplete="off"
+            required
+          />
+          <button type="submit">新增</button>
+        </form>
+
+        <ul id="todo-list" class="todo-list"></ul>
+
+        <footer class="todo-footer">
+          <span id="todo-count">0 項待辦</span>
+          <span id="save-status" class="save-status">載入中...</span>
+          <button id="clear-done" type="button" class="link-btn">清除已完成</button>
+        </footer>
+      </section>
+    </main>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
