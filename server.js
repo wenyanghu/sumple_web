@@ -1,10 +1,10 @@
 const http = require("http");
 const fs = require("fs/promises");
 const path = require("path");
+const { storageMode, readTodos, writeTodos } = require("./lib/storage");
 
 const ROOT = __dirname;
 const PORT = process.env.PORT || 3000;
-const TODOS_FILE = path.join(ROOT, "data", "todos.json");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -12,22 +12,6 @@ const MIME = {
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
 };
-
-async function readTodos() {
-  try {
-    const raw = await fs.readFile(TODOS_FILE, "utf8");
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
-  } catch (err) {
-    if (err.code === "ENOENT") return [];
-    throw err;
-  }
-}
-
-async function writeTodos(todos) {
-  await fs.mkdir(path.dirname(TODOS_FILE), { recursive: true });
-  await fs.writeFile(TODOS_FILE, JSON.stringify(todos, null, 2), "utf8");
-}
 
 function sendJson(res, status, data) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
@@ -59,6 +43,11 @@ async function serveStatic(req, res) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    if (req.url === "/api/health" && req.method === "GET") {
+      sendJson(res, 200, { ok: true, storage: storageMode() });
+      return;
+    }
+
     if (req.url === "/api/todos" && req.method === "GET") {
       sendJson(res, 200, await readTodos());
       return;
@@ -75,7 +64,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       await writeTodos(body);
-      sendJson(res, 200, { ok: true });
+      sendJson(res, 200, { ok: true, storage: storageMode() });
       return;
     }
 
@@ -92,6 +81,11 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
+  const mode = storageMode();
   console.log(`Server running at http://localhost:${PORT}`);
-  console.log(`Todos saved to ${TODOS_FILE}`);
+  console.log(
+    mode === "postgres"
+      ? "Todos stored in PostgreSQL (DATABASE_URL)"
+      : "Todos stored in data/todos.json (local file)"
+  );
 });
