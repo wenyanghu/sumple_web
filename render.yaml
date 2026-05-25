@@ -3,8 +3,12 @@ services:
     name: sumple-web
     runtime: node
     plan: free
+    repo: https://github.com/wenyanghu/sumple_web
+    branch: main
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
     envVars:
       - key: NODE_VERSION
         value: "20"

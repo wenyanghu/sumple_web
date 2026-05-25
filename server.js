@@ -59,9 +59,9 @@ async function readTodosFromCloud() {
 }
 
 async function writeTodosToCloud(todos) {
-  await supabaseRequest("app_data", {
+  await supabaseRequest("app_data?on_conflict=key", {
     method: "POST",
-    headers: { Prefer: "resolution=merge-duplicates" },
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
     body: JSON.stringify({ key: "todos", value: todos }),
   });
 }
@@ -104,6 +104,14 @@ async function serveStatic(req, res) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    if (req.url === "/api/health" && req.method === "GET") {
+      sendJson(res, 200, {
+        ok: true,
+        storage: USE_CLOUD ? "supabase" : "file",
+      });
+      return;
+    }
+
     if (req.url === "/api/todos" && req.method === "GET") {
       sendJson(res, 200, await readTodos());
       return;
@@ -120,7 +128,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       await writeTodos(body);
-      sendJson(res, 200, { ok: true });
+      sendJson(res, 200, { ok: true, storage: USE_CLOUD ? "supabase" : "file" });
       return;
     }
 
