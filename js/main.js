@@ -66,7 +66,9 @@ async function saveTodos() {
     });
 
     if (!res.ok) throw new Error("save failed");
-    setStatus("已儲存至 data/todos.json");
+    const data = await res.json().catch(() => ({}));
+    if (data.storage === "postgres") storage = "postgres";
+    setStatus(storageLabel("已儲存"));
   } catch {
     setStatus("儲存失敗", true);
   } finally {
